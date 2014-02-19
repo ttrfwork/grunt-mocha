@@ -22,21 +22,13 @@ var EventEmitter  = require('events').EventEmitter;
 var reporters     = require('mocha').reporters;
 // Helpers
 var helpers       = require('../support/mocha-helpers');
+var substitute    = require('../support/substitute');
 
 module.exports = function(grunt) {
   // External lib.
   var phantomjs = require('grunt-lib-phantomjs').init(grunt);
 
   var reporter;
-
-  // Growl is optional
-  var growl;
-  try {
-    growl = require('growl');
-  } catch(e) {
-    growl = function(){};
-    grunt.verbose.write('Growl not found, \'npm install growl\' for Growl support');
-  }
 
   // Get an asset file, local to the root of the project.
   var asset = path.join.bind(null, __dirname, '..');
@@ -145,6 +137,9 @@ module.exports = function(grunt) {
       phantomjs.off('console', grunt.log.writeln);
     }
 
+    grunt.verbose.write('Substituting params into template\n').write(JSON.stringify(options));
+    var url = substitute(grunt, options);
+
     // Output errors on script errors
     if (options.logErrors) {
       phantomjs.on('error.*', function(error, stack) {
@@ -163,9 +158,6 @@ module.exports = function(grunt) {
 
     var phantomOptsStr = JSON.stringify(PhantomjsOptions, null, '  ');
     grunt.verbose.writeln('Phantom options: ' + phantomOptsStr);
-
-    // Combine any specified URLs with src files.
-    var urls = options.urls.concat(_.compact(this.filesSrc));
 
     // Remember all stats from all tests
     var testStats = [];
@@ -190,9 +182,6 @@ module.exports = function(grunt) {
         output.push(util.format.apply(util, arguments));
       };
     }
-
-    // Process each filepath in-order.
-    grunt.util.async.forEachSeries(urls, function(url, next) {
       grunt.log.writeln('Testing: ' + url);
 
       // create a new mocha runner façade
@@ -230,6 +219,7 @@ module.exports = function(grunt) {
       }
       reporter = new Reporter(runner);
 
+      grunt.log.write('Starting  template at ').write(url).write(' in phantom\n');
       // Launch PhantomJS.
       phantomjs.spawn(url, {
         // Exit code to use if PhantomJS fails in an uncatchable way.
@@ -242,39 +232,21 @@ module.exports = function(grunt) {
           testStats.push(stats);
 
           if (err) {
-            // Show Growl notice
-            // @TODO: Get an example of this
-            // growl('PhantomJS Error!');
-
             // If there was a PhantomJS error, abort the series.
             grunt.fatal(err);
             done(false);
           } else {
-            // If failures, show growl notice
             if (stats.failures > 0) {
               var reduced = helpers.reduceStats([stats]);
               var failMsg = reduced.failures + '/' + reduced.tests +
                 ' tests failed (' + reduced.duration + 's)';
 
-              // Show Growl notice, if avail
-              growl(failMsg, {
-                image: asset('growl/error.png'),
-                title: 'Failure in ' + grunt.task.current.target,
-                priority: 3
-              });
-
               // Bail tests if bail option is true
               if (options.bail) grunt.warn(failMsg);
             }
-
-            // Process next file/url
-            next();
           }
         }
       });
-    },
-    // All tests have been run.
-    function() {
       if (dest) {
         // Restore console.log to original and write the output
         console.log = consoleLog;
@@ -286,12 +258,6 @@ module.exports = function(grunt) {
       if (stats.failures === 0) {
         var okMsg = stats.tests + ' passed!' + ' (' + stats.duration + 's)';
 
-        growl(okMsg, {
-          image: asset('growl/ok.png'),
-          title: okMsg,
-          priority: 3
-        });
-
         grunt.log.ok(okMsg);
 
         // Async test pass
@@ -300,13 +266,6 @@ module.exports = function(grunt) {
       } else {
         var failMsg = stats.failures + '/' + stats.tests + ' tests failed (' +
           stats.duration + 's)';
-
-        // Show Growl notice, if avail
-        growl(failMsg, {
-          image: asset('growl/error.png'),
-          title: failMsg,
-          priority: 3
-        });
 
         // Bail tests if bail option is true
         if (options.bail) {
@@ -318,6 +277,5 @@ module.exports = function(grunt) {
         // Async test fail
         done(false);
       }
-    });
   });
 };

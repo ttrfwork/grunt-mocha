@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Mocha Runner</title>
+</head>
+<body>
+    <div id="mocha"></div>
+
+    <script src="../test/mocha/mocha.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        mocha.setup('bdd');
+    </script>
+
+    <script src="../phantomjs/bridge.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" src="../test/dependencies/jquery-1.11.0.min.js"></script>
+
+<script type="text/javascript" src="../test/dependencies/dep.js"></script>
+
+    <script src="../test/assertlib/chai.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+var ainit = 'ainit';
+    </script>
+
+<script type="text/javascript" src="../test/data/2.js"></script>
+
+<script type="text/javascript" src="../test/data/1.js"></script>
+
+<script type="text/javascript" src="../test/data/subpath/test/2.test.js"></script>
+
+<script type="text/javascript" src="../test/data/subpath/test/1.test.js"></script>
+
+
+    <script type="text/javascript" charset="utf-8">
+        mocha.run();
+        alert(1);
+    </script>
+</body>
+</html>

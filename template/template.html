@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Mocha Runner</title>
+</head>
+<body>
+    <div id="mocha"></div>
+
+    <script src="<<<<MOCHA_PATH>>>>" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        mocha.setup('bdd');
+    </script>
+
+    <script src="../phantomjs/bridge.js" type="text/javascript" charset="utf-8"></script>
+
+    <<<<DEP_PATH>>>>
+    <script src="<<<<ASSERT_PATH>>>>" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        <<<<ASSERT_INIT>>>>
+    </script>
+
+    <<<<DATA_PATH>>>>
+    <<<<TEST_PATH>>>>
+
+    <script type="text/javascript" charset="utf-8">
+        mocha.run();
+        alert(1);
+    </script>
+</body>
+</html>
